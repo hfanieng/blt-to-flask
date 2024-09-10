@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Data Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="device-column" id="device1">
+            <h2>Device 1</h2>
+            <table id="device1-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>BPM</th>
+                        <th>Duration</th>
+                        <th>Album</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data for Device 1 will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="device-column" id="device2">
+            <h2>Device 2</h2>
+            <table id="device2-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Album</th>
+                        <th>Mood</th>
+                        <th>BPM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data for Device 2 will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Function to update a specific table with new data
+        function updateTable(deviceNumber, data) {
+            const tableBody = document.querySelector(`#device${deviceNumber}-table tbody`);
+            tableBody.innerHTML = '';  // Clear the existing data
+
+            // Check if data contains expected fields
+            if (data && data.track_title && data.track_artist && data.track_album && data.track_bank && data.bpm) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.track_title || 'N/A'}</td>
+                    <td>${data.track_artist || 'N/A'}</td>
+                    <td>${data.track_album || 'N/A'}</td>
+                    <td>${data.track_bank || 'N/A'}</td>
+                    <td>${data.bpm || 'N/A'}</td>
+                `;
+                tableBody.appendChild(row);
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5">No data available</td>';
+                tableBody.appendChild(row);
+            }
+        }
+
+        // Fetch the data for Device 1 and Device 2
+        async function fetchDeviceData(deviceNumber) {
+            const response = await fetch(`/api/device_data/${deviceNumber}`);
+            return response.json();
+        }
+
+        // Function to update the tables for both devices
+        async function updateDeviceTables() {
+            const device1Data = await fetchDeviceData(1);
+            updateTable(1, device1Data);
+
+            const device2Data = await fetchDeviceData(2);
+            updateTable(2, device2Data);
+        }
+
+        // Auto-update the tables every 5 seconds
+        setInterval(updateDeviceTables, 5000);
+
+        // Initial update when the page loads
+        window.onload = updateDeviceTables;
+    </script>
+</body>
+</html>

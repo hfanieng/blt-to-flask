@@ -1,29 +1,112 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Payload Visualizer</title>
-    <link rel="stylesheet" href="static/style.css">
+    <title>Device Data Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>JSON Payload Visualizer</h1>
-        <div id="jsonDisplay">
-            <!-- JSON payload will be displayed here -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <h1>Device Data Viewer</h1>
+            <div class="device-column" id="device1">
+                <h2>Device 1</h2>
+                <div class="data-container">
+                    <span class="title">Title:</span>
+                    <span class="value">{{ title }}</span>
+                    <br>
+                    <span class="artist">Artist:</span>
+                    <span class="value">{{ artist }}</span>
+                    <br>
+                    <span class="bpm">BPM:</span>
+                    <span class="value">{{ bpm }}</span>
+                    <br>
+                    <span class="duration">Duration:</span>
+                    <span class="value">{{ duration }}</span>
+                    <br>
+                    <span class="album">Album:</span>
+                    <span class="value">{{ album }}</span>
+                </div>
+            </div>
+            <div class="device-column" id="device2">
+                <h2>Device 2</h2>
+                <div class="data-container">
+                    <span class="title">Title:</span>
+                    <span class="value">{{ title }}</span>
+                    <br>
+                    <span class="artist">Artist:</span>
+                    <span class="value">{{ artist }}</span>
+                    <br>
+                    <span class="album">Album:</span>
+                    <span class="value">{{ album }}</span>
+                    <br>
+                    <span class="mood">Mood:</span>
+                    <span class="value">{{ mood }}</span>
+                    <br>
+                    <span class="bpm">BPM:</span>
+                    <span class="value">{{ bpm }}</span>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 Device Data Viewer</p>
+    </footer>
 
     <script>
-        // Fetch the JSON data from the server
-        async function fetchData() {
-            const response = await fetch('/api/get_payload');
-            const data = await response.json();
-            document.getElementById('jsonDisplay').textContent = JSON.stringify(data, null, 4);
+        // Funktion zur Aktualisierung einer bestimmten Datenbank mit neuen Daten
+        function updateData(deviceNumber, data) {
+            const device = document.querySelector(`#device${deviceNumber}`);
+            if (device) {
+                const dataContainer = device.querySelector('.data-container');
+                if (dataContainer) {
+                    Object.keys(data).forEach(key => {
+                        const value = document.createElement('span');
+                        value.classList.add('value');
+                        value.textContent = data[key];
+                        dataContainer.appendChild(value);
+                        if (key === 'title' || key === 'artist') {
+                            const label = document.createElement('span');
+                            label.classList.add(key);
+                            label.textContent = `${key.charAt(0).toUpperCase()}${key.slice(1)}:`;
+                            dataContainer.insertBefore(label, dataContainer.querySelector(`.${key}`));
+                        }
+                    });
+                }
+            }
         }
 
-        // Fetch the data when the page loads
-        window.onload = fetchData;
+        // Daten für Device 1 und Device 2 abrufen
+        async function fetchDeviceData(deviceNumber) {
+            const response = await fetch(`/api/device_data/${deviceNumber}`);
+            return response.json();
+        }
+
+        // Funktion zur Aktualisierung der Datenbanken für beide Geräte
+        async function updateDeviceData() {
+            const device1Data = await fetchDeviceData(1);
+            updateData(1, device1Data);
+
+            const device2Data = await fetchDeviceData(2);
+            updateData(2, device2Data);
+        }
+
+        // Datenbanken alle 5 Sekunden automatisch aktualisieren
+        setInterval(updateDeviceData, 5000);
+
+        // Initialaktualisierung bei der Seite laden
+        window.onload = updateDeviceData;
     </script>
 </body>
 </html>

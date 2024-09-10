@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Payload Visualizer</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>JSON Payload Visualizer</h1>
+        <div id="jsonDisplay">
+            <!-- JSON payload will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // Fetch the JSON data from the server
+        async function fetchData() {
+            const response = await fetch('/api/last_payload');
+            const data = await response.json();
+            document.getElementById('jsonDisplay').textContent = JSON.stringify(data, null, 4);
+        }
+
+        // Fetch the data when the page loads
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
